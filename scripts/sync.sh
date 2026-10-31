@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Copy the Dev Agent Kit into a project, or pull template updates into it.
 # Run from the project root:
-#   bash path/to/dev-agent-kit/scripts/sync.sh path/to/dev-agent-kit   # first time
-#   bash scripts/sync.sh                                                # later (remembers the source)
-# The source can be a folder or a git URL.
+#   curl -sSL https://raw.githubusercontent.com/RaisinBread42/Dev-Agent-Skills/main/scripts/sync.sh | bash   # first time
+#   bash scripts/sync.sh                                                                                       # later
+# Optional argument: another source (a local folder or git URL). The last source used is remembered.
 #
 # Updates:  .claude/skills/<kit skills>, .claude/hooks/, scripts/gate.sh, scripts/sync.sh,
 #           .claude/kit/ (reference copies of CLAUDE.template.md, docs-templates, ci, pr-template, settings)
@@ -14,10 +14,7 @@ set -eu
 
 main() {
   src="${1:-$(cat .claude/kit-source 2>/dev/null || true)}"
-  if [ -z "$src" ]; then
-    echo "usage: bash scripts/sync.sh <template-folder-or-git-url>"
-    exit 1
-  fi
+  src="${src:-https://github.com/RaisinBread42/Dev-Agent-Skills.git}"
 
   tpl="$src"
   case "$src" in

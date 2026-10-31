@@ -30,10 +30,11 @@ pr-template.md           requirement, criteria → tests, risk tier, migrations,
 
 Needs Git Bash (Windows) or any bash, and `gh` + Node ≥ 18 for the PR skills.
 
-1. **Install.** From the project root:
+1. **Install.** From the project root (no clone of the kit needed):
    ```bash
-   bash ../dev-agent-kit/scripts/sync.sh ../dev-agent-kit
+   curl -sSL https://raw.githubusercontent.com/RaisinBread42/Dev-Agent-Skills/main/scripts/sync.sh | bash
    ```
+   To install from a local copy instead (e.g. while editing the kit): `bash path/to/Dev-Agent-Skills/scripts/sync.sh path/to/Dev-Agent-Skills`.
    This copies skills to `.claude/skills/`, hooks to `.claude/hooks/`, `gate.sh` and `sync.sh` to `scripts/`, and reference copies of the templates to `.claude/kit/`.
 2. **Set up.** Ask Claude: *"run the project-setup skill"*. It detects the stack and test commands, asks you only about hosting, auth, database and compliance for UAT and PROD, and writes `CLAUDE.md`, `docs/architecture.md`, `docs/environments.md` and `.claude/gate.conf`.
 3. **Review** those files and edit anything wrong. This is the highest-value step.
@@ -66,7 +67,7 @@ Phase 4 only after 1–3 work. The `ready` label is the safety gate: client emai
 bash scripts/sync.sh
 ```
 
-Pulls the latest kit (the source is remembered in `.claude/kit-source`). It replaces the kit's skills, hooks and scripts only. It never touches `CLAUDE.md`, `docs/`, `.claude/gate.conf`, `.claude/settings.json`, `.github/`, or skills the project added itself. Review with `git diff` before committing.
+Pulls the latest kit from GitHub (or from the source last used, remembered in `.claude/kit-source`). It replaces the kit's skills, hooks and scripts only. It never touches `CLAUDE.md`, `docs/`, `.claude/gate.conf`, `.claude/settings.json`, `.github/`, or skills the project added itself. Review with `git diff` before committing.
 
 Improved a skill inside a project? Copy it back here so every project gets it on the next sync.
 
