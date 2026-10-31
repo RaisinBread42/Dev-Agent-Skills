@@ -34,7 +34,7 @@ if [ "$tries" -ge 3 ]; then
 fi
 
 {
-  echo "You are not done: bash scripts/gate.sh failed. Fix the cause (not the check) and try aain."
-  echo "$out"g
+  echo "You are not done: bash scripts/gate.sh failed. Fix the cause (not the check) and try again."
+  echo "$out"
 } >&2
 exit 2
