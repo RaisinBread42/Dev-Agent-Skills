@@ -1,0 +1,36 @@
+# Same checks as the local hook, on every PR.
+# project-setup copies this to .github/workflows/pr-checks.yml and replaces the toolchain step.
+name: PR checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # {{CI_SETUP_STEPS}}
+      # Example for Node:
+      # - uses: actions/setup-node@v4
+      #   with: { node-version: 20, cache: npm }
+      # - run: npm ci
+
+      - name: Lint, type check, tests
+        run: bash scripts/gate.sh
+
+      - name: Flag database migrations
+        run: |
+          . .claude/gate.conf
+          [ -z "${MIGRATIONS_PATH:-}" ] && exit 0
+          changed="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- "$MIGRATIONS_PATH")"
+          if [ -n "$changed" ]; then
+            echo "::warning::This PR changes database migrations. A human must review them."
+            { echo "## ⚠️ Database migrations changed"; echo; echo "$changed" | sed 's/^/- /'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
