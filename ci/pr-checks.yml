@@ -69,3 +69,99 @@ jobs:
   #      run: npm run db:migrate
   #    - name: Integration tests
   #      run: npm run itest:all
+
+  # OPTIONAL — browser click-through (Playwright) on PRs that change the UI: the
+  # real app in a real browser against a throwaway database, with results +
+  # screenshots posted on the PR (scripts/e2e-summary.mjs). Uncomment and adapt.
+  # Login: sign a test session with a throwaway secret only this runner has
+  # (for Auth.js JWT sessions, see letsstay's e2e/support/session.ts) — never a
+  # login bypass in app code. Example below is Postgres + Node + Auth.js (letsstay).
+  #e2e:
+  #  runs-on: ubuntu-latest
+  #  permissions:
+  #    contents: read
+  #    pull-requests: write # post the click-through comment
+  #  services:
+  #    postgres:
+  #      image: postgres:16
+  #      env:
+  #        POSTGRES_USER: app
+  #        POSTGRES_PASSWORD: app
+  #        POSTGRES_DB: app_test
+  #      ports: ["5432:5432"]
+  #      options: >-
+  #        --health-cmd pg_isready
+  #        --health-interval 5s
+  #        --health-timeout 5s
+  #        --health-retries 10
+  #  env:
+  #    DATABASE_URL: postgres://app:app@localhost:5432/app_test
+  #    AUTH_SECRET: e2e-throwaway-secret-only-valid-in-this-runner
+  #    AUTH_TRUST_HOST: "true"
+  #    APP_URL: http://localhost:3000
+  #    # Placeholders: Cognito is only contacted on a real sign-in, which these tests never do.
+  #    AUTH_COGNITO_ID: e2e
+  #    AUTH_COGNITO_SECRET: e2e
+  #    AUTH_COGNITO_ISSUER: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_e2e
+  #  steps:
+  #    - uses: actions/checkout@v4
+  #      with:
+  #        fetch-depth: 0
+  #
+  #    - name: Did this PR change the UI?
+  #      id: ui
+  #      run: |
+  #        if [ "${{ github.event_name }}" != "pull_request" ]; then echo "changed=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+  #        files="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")"
+  #        if echo "$files" | grep -qE '^(app|components|lib|styles|public|e2e)/|^playwright\.config\.ts$|^package(-lock)?\.json$'; then
+  #          echo "changed=true" >> "$GITHUB_OUTPUT"
+  #        else
+  #          echo "changed=false" >> "$GITHUB_OUTPUT"
+  #          echo "No UI files changed: browser click-through skipped." >> "$GITHUB_STEP_SUMMARY"
+  #        fi
+  #
+  #    - uses: actions/setup-node@v4
+  #      if: steps.ui.outputs.changed == 'true'
+  #      with: { node-version: 22, cache: npm }
+  #    - if: steps.ui.outputs.changed == 'true'
+  #      run: npm ci
+  #    - name: Install browser
+  #      if: steps.ui.outputs.changed == 'true'
+  #      run: npx playwright install --with-deps chromium
+  #    - name: Create schema
+  #      if: steps.ui.outputs.changed == 'true'
+  #      run: npm run db:migrate
+  #
+  #    - name: Browser click-through
+  #      id: e2e
+  #      if: steps.ui.outputs.changed == 'true'
+  #      run: npm run e2e
+  #
+  #    - name: Upload screenshots
+  #      id: upload
+  #      if: always() && steps.ui.outputs.changed == 'true'
+  #      uses: actions/upload-artifact@v4
+  #      with:
+  #        name: e2e-click-through
+  #        path: e2e-results/
+  #        if-no-files-found: ignore
+  #        retention-days: 30
+  #
+  #    - name: Post results on the PR
+  #      if: always() && steps.ui.outputs.changed == 'true' && github.event_name == 'pull_request'
+  #      env:
+  #        GH_TOKEN: ${{ github.token }}
+  #        ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+  #      run: |
+  #        node scripts/e2e-summary.mjs e2e-results/results.json "$ARTIFACT_URL" > e2e-summary.md
+  #        cat e2e-summary.md >> "$GITHUB_STEP_SUMMARY"
+  #        # One comment per PR, updated on every run (not a new comment per push).
+  #        marker="<!-- e2e-click-through -->"
+  #        { echo "$marker"; cat e2e-summary.md; } > e2e-comment.md
+  #        existing="$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+  #          --jq "[.[] | select(.body | startswith(\"$marker\"))][0].id // empty")"
+  #        if [ -n "$existing" ]; then
+  #          gh api -X PATCH "repos/${{ github.repository }}/issues/comments/$existing" -F body=@e2e-comment.md >/dev/null
+  #        else
+  #          gh pr comment "${{ github.event.pull_request.number }}" --body-file e2e-comment.md
+  #        fi

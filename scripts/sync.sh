@@ -5,7 +5,7 @@
 #   bash scripts/sync.sh                                                                                       # later
 # Optional argument: another source (a local folder or git URL). The last source used is remembered.
 #
-# Updates:  .claude/skills/<kit skills>, .claude/hooks/, scripts/gate.sh, scripts/sync.sh,
+# Updates:  .claude/skills/<kit skills>, .claude/hooks/, scripts/gate.sh, scripts/sync.sh, scripts/e2e-summary.mjs,
 #           .claude/kit/ (reference copies of CLAUDE.template.md, docs-templates, ci, pr-template, settings)
 # Never touches: CLAUDE.md, docs/, .claude/gate.conf, .claude/settings.json, .github/,
 #           or skills the project added itself.
@@ -40,7 +40,7 @@ main() {
   done
 
   cp "$tpl"/hooks/*.sh .claude/hooks/
-  cp "$tpl"/scripts/gate.sh "$tpl"/scripts/sync.sh scripts/
+  cp "$tpl"/scripts/gate.sh "$tpl"/scripts/sync.sh "$tpl"/scripts/e2e-summary.mjs scripts/
 
   rm -rf .claude/kit
   mkdir -p .claude/kit
