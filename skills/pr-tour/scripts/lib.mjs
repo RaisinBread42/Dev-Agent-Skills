@@ -195,7 +195,8 @@ function machineWritten(path, a) {
   if (!a.length) return null;
   const base = path.split("/").pop();
   const long = a.some((l) => l.s.length > 1000) || a.reduce((n, l) => n + l.s.length, 0) / a.length > 200;
-  if (long && /\.(js|mjs|cjs|css|json|svg)$/.test(path)) return "generated: minified or bundled";
+  // Hand-edited JSON (package.json etc.) can carry one long line, e.g. a chained npm script.
+  if (long && /\.(js|mjs|cjs|css|json|svg)$/.test(path) && !HAND_JSON.test(base)) return "generated: minified or bundled";
   if (/\.json$/.test(path) && a.length >= 500 && !HAND_JSON.test(base)) return "generated: large JSON";
   return null;
 }
