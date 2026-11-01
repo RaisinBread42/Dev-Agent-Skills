@@ -15,13 +15,14 @@ skills/
   pr-triage/ pr-tour/ adversarial-tester/   from RaisinBread42/skills (MIT, see each LICENSE)
 scripts/
   gate.sh                lint + type check + tests, one command (reads .claude/gate.conf)
+  e2e-summary.mjs        Playwright JSON report → the pass/fail table posted on the PR
   sync.sh                install the kit into a project, or pull template updates
 hooks/
   stop-gate.sh           Claude can't finish while gate.sh fails
   guard.sh               blocks reading or editing .env files
   settings.json          wires both hooks into .claude/settings.json
 ci/
-  pr-checks.yml          gate.sh + migration warning on every PR (+ optional throwaway-DB itest job)
+  pr-checks.yml          gate.sh + migration warning on every PR (+ optional throwaway-DB itest and browser click-through jobs)
   agent-on-ready.yml     Phase 4: "ready" label on an issue → Claude builds, self-attacks (adversarial-tester), opens a PR
 pr-template.md           requirement, criteria → tests, risk tier, migrations, tour
 ```
@@ -77,6 +78,18 @@ Improved a skill inside a project? Copy it back here so every project gets it on
 - Detail goes in `reference/`, read only by the step that needs it.
 - Repeatable mechanics go in scripts, not prose.
 - No project facts in skills: they read `CLAUDE.md` and `docs/`.
+
+## Browser click-through (optional)
+
+Agent PRs used to end with "please click through on a preview deploy". With the optional `e2e` job, the agent does it:
+
+- **In CI, never against real environments.** The app runs on the runner against a throwaway database; nothing touches UAT, PROD or the real identity provider.
+- **Login without a backdoor.** The tests sign a test session with a throwaway secret that only the runner has (for Auth.js JWT sessions: `encode()` with the session-cookie salt). No auth code in the app changes, and the token is useless against any real server.
+- **A guard** in the test setup refuses any non-local database URL, because the tests write data.
+- **On UI PRs**, `pr-checks.yml`'s `e2e` job posts one PR comment with a pass/fail table (updated on each push) and uploads screenshots of every step as an artifact. GitHub's API can't put images inline in a comment, so the comment links to the artifact.
+- **The agent runs it first.** With the optional test database in `agent-on-ready.yml`, step 2b has the agent write one click-through test per user-visible acceptance criterion, run it, check the screenshots and fix the code before opening the PR.
+
+Reference implementation: RaisinBread42/letsstay (`playwright.config.ts`, `e2e/support/`).
 
 ## Caveats
 
