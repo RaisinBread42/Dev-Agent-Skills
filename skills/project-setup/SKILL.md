@@ -31,9 +31,10 @@ Turns the kit's templates in `.claude/kit/` into this project's own files. Run i
 6. **Stop for review.** List the files written and every guess you made. Wait for the user to approve or edit.
 7. **After approval, switch on the gates:**
    - Merge `.claude/kit/settings.json` hooks into `.claude/settings.json` (keep existing settings).
-   - Copy `.claude/kit/ci/pr-checks.yml` to `.github/workflows/pr-checks.yml`; replace `{{CI_SETUP_STEPS}}` with the toolchain install steps.
+   - Copy `.claude/kit/ci/pr-checks.yml` to `.github/workflows/pr-checks.yml`; replace `{{CI_SETUP_STEPS}}` with the toolchain install steps. If the project has DB-backed tests, uncomment the optional `itest` job and adapt it (throwaway database service, schema step, test command).
    - Copy `.claude/kit/pr-template.md` to `.github/pull_request_template.md`.
-   - Only if the user asks for Phase 4: copy `.claude/kit/ci/agent-on-ready.yml` the same way and tell them to create the `ready` label and the API key secret (UAT-only secrets).
+   - Exclude the synced kit skills and `.claude/kit/` from the project's linter (they include a minified vendor bundle).
+   - Only if the user asks for Phase 4: copy `.claude/kit/ci/agent-on-ready.yml` the same way, and replace the `npm`/`npx`/`node` entries in `--allowedTools` with the project's toolchain commands (a tool not listed is silently denied in CI and the run ends with no PR). Tell them to create the `ready` label and the API key secret (UAT-only secrets).
 
 ## Done means
 

@@ -4,6 +4,7 @@ name: PR checks
 
 on:
   pull_request:
+  workflow_dispatch: # manual run from the Actions tab
 
 permissions:
   contents: read
@@ -26,6 +27,7 @@ jobs:
         run: bash scripts/gate.sh
 
       - name: Flag database migrations
+        if: github.event_name == 'pull_request'
         run: |
           . .claude/gate.conf
           [ -z "${MIGRATIONS_PATH:-}" ] && exit 0
@@ -34,3 +36,36 @@ jobs:
             echo "::warning::This PR changes database migrations. A human must review them."
             { echo "## ⚠️ Database migrations changed"; echo; echo "$changed" | sed 's/^/- /'; } >> "$GITHUB_STEP_SUMMARY"
           fi
+
+
+  # OPTIONAL — integration tests against a throwaway database that exists only for
+  # this run (no secrets, fresh every run). Uncomment and adapt if the project has
+  # DB-backed tests. Example below is Postgres + Node (from the letsstay project).
+  #itest:
+  #  runs-on: ubuntu-latest
+  #  services:
+  #    postgres:
+  #      image: postgres:16 # same major version as docker-compose.yml / Azure
+  #      env:
+  #        POSTGRES_USER: letsstay
+  #        POSTGRES_PASSWORD: letsstay
+  #        POSTGRES_DB: letsstay_test
+  #      ports: ["5432:5432"]
+  #      options: >-
+  #        --health-cmd pg_isready
+  #        --health-interval 5s
+  #        --health-timeout 5s
+  #        --health-retries 10
+  #  env:
+  #    # itests write to whatever DATABASE_URL points at; here that is the container.
+  #    DATABASE_URL: postgres://letsstay:letsstay@localhost:5432/letsstay_test
+  #    DATABASE_URL_TEST: postgres://letsstay:letsstay@localhost:5432/letsstay_test
+  #  steps:
+  #    - uses: actions/checkout@v4
+  #    - uses: actions/setup-node@v4
+  #      with: { node-version: 22, cache: npm }
+  #    - run: npm ci
+  #    - name: Create schema
+  #      run: npm run db:migrate
+  #    - name: Integration tests
+  #      run: npm run itest:all
