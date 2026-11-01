@@ -21,8 +21,8 @@ hooks/
   guard.sh               blocks reading or editing .env files
   settings.json          wires both hooks into .claude/settings.json
 ci/
-  pr-checks.yml          gate.sh + migration warning on every PR
-  agent-on-ready.yml     Phase 4: "ready" label on an issue → Claude opens a PR
+  pr-checks.yml          gate.sh + migration warning on every PR (+ optional throwaway-DB itest job)
+  agent-on-ready.yml     Phase 4: "ready" label on an issue → Claude builds, self-attacks (adversarial-tester), opens a PR
 pr-template.md           requirement, criteria → tests, risk tier, migrations, tour
 ```
 
@@ -82,3 +82,6 @@ Improved a skill inside a project? Copy it back here so every project gets it on
 
 - Compliance (SOC 2, DPA) is mostly process and controls. Tests can prove specific controls; this kit is not an audit.
 - Verdicts are only as good as the tests. Weak coverage means building that safety net first.
+- `guard.sh` matches the text `.env` anywhere in a Bash command, including a commit message or a heredoc. Reword the command (or use the Edit tool) rather than weakening the guard.
+- `pr-triage` and `pr-tour` ship a minified vendor bundle. Exclude the synced kit skills and `.claude/kit/` from the project's linter, or lint reports thousands of warnings and can run out of memory. Kit files are overwritten on every sync, so fix them here, not in the project.
+- In CI, Claude cannot ask for permission: a tool missing from `--allowedTools` in `agent-on-ready.yml` is denied and the run still shows green, with no PR. `show_full_output: true` puts the transcript in the job log; on a public repo anyone can read it.
