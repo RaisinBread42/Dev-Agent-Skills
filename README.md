@@ -15,6 +15,7 @@ skills/
   pr-triage/ pr-tour/ adversarial-tester/   from RaisinBread42/skills (MIT, see each LICENSE)
 scripts/
   gate.sh                lint + type check + tests, one command (reads .claude/gate.conf)
+  magic-strings.sh       lists likely magic strings the current change adds (compared or repeated literals)
   e2e-summary.mjs        Playwright JSON report → the pass/fail table posted on the PR
   sync.sh                install the kit into a project, or pull template updates
 hooks/
@@ -22,7 +23,7 @@ hooks/
   guard.sh               blocks reading or editing .env files
   settings.json          wires both hooks into .claude/settings.json
 ci/
-  pr-checks.yml          gate.sh + migration warning on every PR (+ optional throwaway-DB itest and browser click-through jobs)
+  pr-checks.yml          gate.sh + magic-string and migration warnings on every PR (+ optional throwaway-DB itest and browser click-through jobs)
   agent-on-ready.yml     Phase 4: "ready" label on an issue → Claude builds, self-attacks (adversarial-tester), opens a PR
 pr-template.md           requirement, criteria → tests, risk tier, migrations, tour
 ```
@@ -60,6 +61,7 @@ Phase 4 only after 1–3 work. The `ready` label is the safety gate: client emai
 | Not done until lint, types and tests pass | `hooks/stop-gate.sh` locally, `ci/pr-checks.yml` on PRs |
 | No `.env` reads or edits | `hooks/guard.sh` |
 | Migrations always flagged | PR template section + CI warning (`MIGRATIONS_PATH` in `gate.conf`) |
+| No magic strings | `CLAUDE.md` rule, `implement-feature` step, PR template checkbox, CI warning (`scripts/magic-strings.sh`) |
 | No PROD credentials | Process: keep PROD secrets out of the repo and the agent's environment |
 
 ## Keeping projects up to date

@@ -64,6 +64,7 @@ Write it as markdown, NOT inside a code block (``` renders as one unwrapped line
 ## Gate
 
 - [ ] `bash scripts/gate.sh` passes locally
+- [ ] `bash scripts/magic-strings.sh` is clean, or each finding left is listed here with why it's fine:
 
 ## Tour
 

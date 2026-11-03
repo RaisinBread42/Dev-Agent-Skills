@@ -15,6 +15,7 @@ Turns the kit's templates in `.claude/kit/` into this project's own files. Run i
    - Lint, type check and test commands (scripts in the manifest, config files). Run each once to confirm it works locally.
    - Folder structure, naming, and one example file per kind of code (service, component, test, document, template).
    - Request flow, migrations folder, auth library and roles if visible in code.
+   - Where constants and enums live (e.g. `lib/constants.ts`, a `constants/` folder, enums next to the model). If there is no such place, propose one in the review step. Run `bash scripts/magic-strings.sh` against an early commit to gauge how many magic strings exist, and report the count; don't fix them in setup.
 3. **Ask only what you couldn't detect**, in one message: for UAT and PROD, the hosting, auth provider, database and other services, URLs, deploy flow; and compliance needs (e.g. SOC 2, DPA, GDPR): which data is personal, who may see it, retention and deletion rules. Every project has UAT and PROD.
 4. **Write the files** (if one already exists, merge into it; never drop the user's content):
    - `CLAUDE.md` from `.claude/kit/CLAUDE.template.md`. Fill every `{{placeholder}}`. Keep it to about a page; detail goes in the docs.

@@ -10,6 +10,7 @@ Stack: {{STACK}}. More detail: [docs/architecture.md](docs/architecture.md), [do
 - No clever abstractions, no new layers, no new libraries without asking.
 - Follow the existing pattern. Before writing a service, component, test, document or template, find the closest existing one and copy its shape.
 - Small functions, clear names, no dead code, no commented-out code.
+- No magic strings. Statuses, roles, types, route paths, event names, setting keys, error codes and any literal you compare against or use twice go in a named constant or enum in {{CONSTANTS_LOCATION}}; reuse one if it already exists. User-facing copy goes where the project keeps its copy. Check a change with `bash scripts/magic-strings.sh`.
 
 ## Where things live
 

@@ -11,8 +11,9 @@ description: "Build a feature or change end to end: requirement, short plan the 
 2. **Read the rules.** `CLAUDE.md` and `docs/architecture.md`. For each piece you will add, find the closest existing example and follow its pattern.
 3. **Plan.** At most ten lines: files to add or change, and the test list mapped to each criterion. Stop and wait for approval. In an unattended run (no one to ask), put the plan in the PR description and continue.
 4. **Tests first.** Write unit tests from the business rules, following [reference/test-policy.md](reference/test-policy.md). Run them and watch them fail for the right reason.
-5. **Services.** Implement the domain and service code until the tests pass. Keep it simple; no new abstractions.
+5. **Services.** Implement the domain and service code until the tests pass. Keep it simple; no new abstractions. No magic strings: before typing a status, role, route or key as a literal, look for the existing constant or enum (where `CLAUDE.md` says they live) and use it; add one there if none exists.
 6. **UI last.** Wire the UI to the tested services. Keep logic out of components.
+6b. **Magic strings.** `bash scripts/magic-strings.sh`. Replace each finding with a named constant, or list it in the PR with one line on why it's fine (e.g. a one-off log message).
 7. **Security.** If the change touches personal data, auth or permissions, run the `security-compliance-check` skill and fix what it finds.
 8. **Gate.** `bash scripts/gate.sh` until it passes. Fix causes, never weaken a check or a test.
 9. **PR.** Fill in `.github/pull_request_template.md`: requirement, plan, criterion → test table, risk tier, migrations, security result.
@@ -21,4 +22,5 @@ description: "Build a feature or change end to end: requirement, short plan the 
 
 - Every acceptance criterion has exactly one test that names it.
 - The gate passes.
+- `scripts/magic-strings.sh` is clean, or every remaining finding is justified in the PR.
 - Migrations, if any, are called out in the PR.
